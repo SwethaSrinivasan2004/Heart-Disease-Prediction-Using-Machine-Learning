@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heart Disease Prediction</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #74ebd5, #acb6e5);
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .form-container {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 400px;
+            overflow-y: auto;
+            max-height: 90vh;
+        }
+        .form-container h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #4a90e2;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: #4a90e2;
+            outline: none;
+            box-shadow: 0 0 3px rgba(74, 144, 226, 0.5);
+        }
+        .submit-button {
+            width: 100%;
+            padding: 10px;
+            background: #4a90e2;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .submit-button:hover {
+            background: #357abd;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h2>Heart Disease Predictor</h2>
+        <form id="prediction-form">
+            <div class="form-group">
+                <label for="age">Age</label>
+                <input type="number" id="age" name="age" required>
+            </div>
+            <div class="form-group">
+                <label for="sex">Sex</label>
+                <select id="sex" name="sex" required>
+                    <option value="1">Male</option>
+                    <option value="0">Female</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="cp">Chest Pain Type</label>
+                <select id="cp" name="cp" required>
+                    <option value="0">Type 0</option>
+                    <option value="1">Type 1</option>
+                    <option value="2">Type 2</option>
+                    <option value="3">Type 3</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="trestbps">Resting Blood Pressure (mm Hg)</label>
+                <input type="number" id="trestbps" name="trestbps" required>
+            </div>
+            <div class="form-group">
+                <label for="chol">Serum Cholesterol (mg/dl)</label>
+                <input type="number" id="chol" name="chol" required>
+            </div>
+            <div class="form-group">
+                <label for="fbs">Fasting Blood Sugar > 120 mg/dl</label>
+                <select id="fbs" name="fbs" required>
+                    <option value="1">Yes</option>
+                    <option value="0">No</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="restecg">Resting ECG Results</label>
+                <select id="restecg" name="restecg" required>
+                    <option value="0">Normal</option>
+                    <option value="1">ST-T Wave Abnormality</option>
+                    <option value="2">Left Ventricular Hypertrophy</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="thalach">Max Heart Rate Achieved</label>
+                <input type="number" id="thalach" name="thalach" required>
+            </div>
+            <div class="form-group">
+                <label for="exang">Exercise Induced Angina</label>
+                <select id="exang" name="exang" required>
+                    <option value="1">Yes</option>
+                    <option value="0">No</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="oldpeak">Oldpeak (ST Depression)</label>
+                <input type="number" step="0.1" id="oldpeak" name="oldpeak" required>
+            </div>
+            <div class="form-group">
+                <label for="slope">Slope of Peak Exercise ST Segment</label>
+                <select id="slope" name="slope" required>
+                    <option value="0">Upsloping</option>
+                    <option value="1">Flat</option>
+                    <option value="2">Downsloping</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="ca">Number of Major Vessels (0-3)</label>
+                <input type="number" id="ca" name="ca" min="0" max="3" required>
+            </div>
+            <div class="form-group">
+                <label for="thal">Thalassemia</label>
+                <select id="thal" name="thal" required>
+                    <option value="1">Normal</option>
+                    <option value="2">Fixed Defect</option>
+                    <option value="3">Reversible Defect</option>
+                </select>
+            </div>
+            <button type="submit" class="submit-button">Submit</button>
+        </form>
+    </div>
+<script>
+    document.getElementById('prediction-form').addEventListener('submit', function (e) {
+        e.preventDefault(); // Prevent default form submission
+
+        const formData = new FormData(e.target);
+
+        fetch('/predict', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            const prediction = data.prediction ? "Positive" : "Negative";
+            const probability = (data.probability * 100).toFixed(2) + "%";
+
+            // Redirect to a new page with results
+            const resultPage = `
+                <html>
+                    <head>
+                        <title>Prediction Result</title>
+                        <style>
+                            body {
+                                font-family: Arial, sans-serif;
+                                display: flex;
+                                justify-content: center;
+                                align-items: center;
+                                height: 100vh;
+                                margin: 0;
+                                background: linear-gradient(to right, #ff7e5f, #feb47b);
+                                color: #fff;
+                                text-align: center;
+                            }
+                            .result-container {
+                                background: rgba(0, 0, 0, 0.7);
+                                padding: 30px;
+                                border-radius: 10px;
+                                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+                            }
+                            .result-container h1 {
+                                font-size: 2.5em;
+                                margin-bottom: 20px;
+                            }
+                            .result-container p {
+                                font-size: 1.5em;
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="result-container">
+                            <h1>Prediction Result</h1>
+                            <p><strong>Prediction:</strong> ${prediction}</p>
+                            <p><strong>Probability:</strong> ${probability}</p>
+                        </div>
+                    </body>
+                </html>
+            `;
+            const newWindow = window.open();
+            newWindow.document.write(resultPage);
+        });
+    });
+</script>
+</body>
+</html>
